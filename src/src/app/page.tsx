@@ -3,8 +3,8 @@
 
 import { FormEvent, useState } from "react";
 
-type FaceApiResponse = {
-  faceId: string;
+type DetectedFace = {
+  faceId?: string;
   faceRectangle: {
     top: number;
     left: number;
@@ -12,7 +12,9 @@ type FaceApiResponse = {
     height: number;
   };
   faceAttributes?: Record<string, unknown>;
-}[];
+};
+
+type FaceApiResponse = DetectedFace[];
 
 const exampleImage =
   "https://raw.githubusercontent.com/Azure-Samples/cognitive-services-sample-data-files/master/ComputerVision/Images/faces.jpg";
@@ -130,6 +132,10 @@ export default function Home() {
 
             <div className="flex flex-col gap-2">
               <h2 className="text-lg font-semibold text-slate-100">Detection results</h2>
+              <p className="text-xs text-slate-500">
+                Requests use detection model <code className="rounded bg-slate-800 px-1">detection_03</code> and only ask for
+                allowed attributes (head pose, glasses, mask, occlusion, blur, exposure, and noise).
+              </p>
               {isLoading && <p className="text-sm text-slate-400">Calling Azure Face API…</p>}
               {error && (
                 <div className="rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm text-red-200">
@@ -148,13 +154,17 @@ export default function Home() {
                 </p>
               )}
               <ul className="flex flex-col gap-3 text-sm text-slate-200">
-                {faces.map((face) => {
+                {faces.map((face, index) => {
                   const attributeKeys = face.faceAttributes ? Object.keys(face.faceAttributes) : [];
                   const hasAttributes = attributeKeys.length > 0;
+                  const faceLabel = face.faceId ? `Face ${index + 1} (ID ${face.faceId})` : `Face ${index + 1}`;
 
                   return (
-                    <li key={face.faceId} className="rounded-lg border border-slate-800 bg-slate-950 p-3">
-                      <p className="font-mono text-xs text-slate-400">ID: {face.faceId}</p>
+                    <li
+                      key={face.faceId ?? `${index}-${face.faceRectangle.top}-${face.faceRectangle.left}`}
+                      className="rounded-lg border border-slate-800 bg-slate-950 p-3"
+                    >
+                      <p className="font-semibold text-slate-100">{faceLabel}</p>
                       <p className="mt-1 text-xs text-slate-400">
                         Rectangle — top: {face.faceRectangle.top}, left: {face.faceRectangle.left}, width:
                         {face.faceRectangle.width}, height: {face.faceRectangle.height}

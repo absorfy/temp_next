@@ -32,6 +32,15 @@ This template includes a simple interface that forwards an image URL to the [Azu
 2. Start the development server with `npm run dev` and open [http://localhost:3000](http://localhost:3000).
 3. Paste a publicly accessible image URL (for example, the prefilled sample) and submit the form. The API route defined in `app/api/face/route.ts` will call your Face API resource and return detection results.
 
+### Feature restrictions
+
+The sample keeps requests within the capabilities of unapproved Face API resources by:
+
+- Using the `detection_03` model and disabling `returnFaceId` so the API only performs detection.
+- Requesting a limited set of attributes that remain available without additional approval (`headPose`, `glasses`, `mask`, `occlusion`, `blur`, `exposure`, and `noise`).
+
+If you need features such as `returnFaceId`, verification/identification, or the deprecated demographic attributes (age, gender, emotion, etc.), you must request access from Microsoft and use an approved resource.
+
 ### Troubleshooting authentication errors
 
 - If you receive a 401 or 403 response, double-check that the endpoint and key come from the same Face API resource and that the key has not been regenerated since you configured your environment variables.

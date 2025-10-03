@@ -32,10 +32,13 @@ export async function POST(request: NextRequest) {
   }
 
   const trimmedEndpoint = endpoint.replace(/\/$/, "");
-  const detectUrl =
-    `${trimmedEndpoint}/face/v1.0/detect` +
-    "?returnFaceId=true" +
-    "&recognitionModel=recognition_04";
+  const params = new URLSearchParams({
+    returnFaceId: "false",
+    detectionModel: "detection_03",
+    returnFaceAttributes: "headPose,glasses,mask,occlusion,blur,exposure,noise",
+  });
+
+  const detectUrl = `${trimmedEndpoint}/face/v1.0/detect?${params.toString()}`;
 
   try {
     const azureResponse = await fetch(detectUrl, {
