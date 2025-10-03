@@ -134,7 +134,7 @@ export default function Home() {
               <h2 className="text-lg font-semibold text-slate-100">Detection results</h2>
               <p className="text-xs text-slate-500">
                 Requests use detection model <code className="rounded bg-slate-800 px-1">detection_03</code> and only ask for
-                allowed attributes (head pose, glasses, mask, occlusion, blur, exposure, and noise).
+                allowed attributes (head pose, glasses, mask, occlusion, blur, exposure, and quality for recognition).
               </p>
               {isLoading && <p className="text-sm text-slate-400">Calling Azure Face API…</p>}
               {error && (

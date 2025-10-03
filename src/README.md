@@ -37,7 +37,7 @@ This template includes a simple interface that forwards an image URL to the [Azu
 The sample keeps requests within the capabilities of unapproved Face API resources by:
 
 - Using the `detection_03` model and disabling `returnFaceId` so the API only performs detection.
-- Requesting a limited set of attributes that remain available without additional approval (`headPose`, `glasses`, `mask`, `occlusion`, `blur`, `exposure`, and `noise`).
+- Requesting a limited set of attributes that remain available without additional approval (`headPose`, `glasses`, `mask`, `occlusion`, `blur`, `exposure`, and `qualityForRecognition`).
 
 If you need features such as `returnFaceId`, verification/identification, or the deprecated demographic attributes (age, gender, emotion, etc.), you must request access from Microsoft and use an approved resource.
 
