@@ -35,8 +35,7 @@ export async function POST(request: NextRequest) {
   const detectUrl =
     `${trimmedEndpoint}/face/v1.0/detect` +
     "?returnFaceId=true" +
-    "&recognitionModel=recognition_04" +
-    "&returnFaceAttributes=age,emotion,smile,facialHair,glasses";
+    "&recognitionModel=recognition_04";
 
   try {
     const azureResponse = await fetch(detectUrl, {

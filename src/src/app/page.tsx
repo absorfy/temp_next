@@ -1,19 +1,7 @@
 "use client";
 /* eslint-disable @next/next/no-img-element */
 
-import { FormEvent, useMemo, useState } from "react";
-
-type FaceApiAttributes = {
-  age?: number;
-  emotion?: Record<string, number>;
-  smile?: number;
-  facialHair?: {
-    moustache: number;
-    beard: number;
-    sideburns: number;
-  };
-  glasses?: string;
-};
+import { FormEvent, useState } from "react";
 
 type FaceApiResponse = {
   faceId: string;
@@ -23,66 +11,30 @@ type FaceApiResponse = {
     width: number;
     height: number;
   };
-  faceAttributes?: FaceApiAttributes;
+  faceAttributes?: Record<string, unknown>;
 }[];
 
 const exampleImage =
   "https://raw.githubusercontent.com/Azure-Samples/cognitive-services-sample-data-files/master/ComputerVision/Images/faces.jpg";
 
+type UiError = {
+  message: string;
+  details?: string;
+};
+
 export default function Home() {
   const [imageUrl, setImageUrl] = useState<string>(exampleImage);
   const [faces, setFaces] = useState<FaceApiResponse>([]);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<UiError | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const hasResults = faces.length > 0;
-
-  const formattedFaces = useMemo(() => {
-    return faces.map((face) => {
-      const details: string[] = [];
-
-      if (face.faceAttributes?.age !== undefined) {
-        details.push(`Estimated age: ${face.faceAttributes.age}`);
-      }
-
-      if (face.faceAttributes?.smile !== undefined) {
-        details.push(`Smile score: ${(face.faceAttributes.smile * 100).toFixed(1)}%`);
-      }
-
-      if (face.faceAttributes?.glasses) {
-        details.push(`Glasses: ${face.faceAttributes.glasses}`);
-      }
-
-      if (face.faceAttributes?.facialHair) {
-        const { moustache, beard, sideburns } = face.faceAttributes.facialHair;
-        details.push(
-          `Facial hair (moustache/beard/sideburns): ${[moustache, beard, sideburns]
-            .map((value) => `${Math.round(value * 100)}%`)
-            .join(" / ")}`,
-        );
-      }
-
-      if (face.faceAttributes?.emotion) {
-        const topEmotion = Object.entries(face.faceAttributes.emotion).sort(([, a], [, b]) => b - a)[0];
-        if (topEmotion) {
-          const [emotion, confidence] = topEmotion;
-          details.push(`Top emotion: ${emotion} (${(confidence * 100).toFixed(1)}%)`);
-        }
-      }
-
-      return {
-        id: face.faceId,
-        rectangle: face.faceRectangle,
-        summary: details,
-      };
-    });
-  }, [faces]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     if (!imageUrl.trim()) {
-      setError("Please provide an image URL.");
+      setError({ message: "Please provide an image URL." });
       return;
     }
 
@@ -191,26 +143,35 @@ export default function Home() {
               )}
               {!isLoading && !error && !hasResults && (
                 <p className="text-sm text-slate-400">
-                  Submit an image to see detected faces, bounding box coordinates, and selected attributes.
+                  Submit an image to see detected faces, bounding box coordinates, and any additional metadata returned by
+                  Azure.
                 </p>
               )}
               <ul className="flex flex-col gap-3 text-sm text-slate-200">
-                {formattedFaces.map((face) => (
-                  <li key={face.id} className="rounded-lg border border-slate-800 bg-slate-950 p-3">
-                    <p className="font-mono text-xs text-slate-400">ID: {face.id}</p>
-                    <p className="mt-1 text-xs text-slate-400">
-                      Rectangle — top: {face.rectangle.top}, left: {face.rectangle.left}, width: {face.rectangle.width}, height:
-                      {face.rectangle.height}
-                    </p>
-                    {face.summary.length > 0 && (
-                      <ul className="mt-2 list-disc space-y-1 pl-5 text-slate-200">
-                        {face.summary.map((item) => (
-                          <li key={item}>{item}</li>
-                        ))}
-                      </ul>
-                    )}
-                  </li>
-                ))}
+                {faces.map((face) => {
+                  const attributeKeys = face.faceAttributes ? Object.keys(face.faceAttributes) : [];
+                  const hasAttributes = attributeKeys.length > 0;
+
+                  return (
+                    <li key={face.faceId} className="rounded-lg border border-slate-800 bg-slate-950 p-3">
+                      <p className="font-mono text-xs text-slate-400">ID: {face.faceId}</p>
+                      <p className="mt-1 text-xs text-slate-400">
+                        Rectangle — top: {face.faceRectangle.top}, left: {face.faceRectangle.left}, width:
+                        {face.faceRectangle.width}, height: {face.faceRectangle.height}
+                      </p>
+                      {hasAttributes && (
+                        <details className="mt-2 rounded border border-slate-800 bg-slate-900 p-2">
+                          <summary className="cursor-pointer text-xs font-semibold text-slate-100">
+                            Face attributes ({attributeKeys.join(", ")})
+                          </summary>
+                          <pre className="mt-2 overflow-auto rounded bg-slate-950 p-2 text-xs text-slate-300">
+                            {JSON.stringify(face.faceAttributes, null, 2)}
+                          </pre>
+                        </details>
+                      )}
+                    </li>
+                  );
+                })}
               </ul>
               {hasResults && (
                 <details className="rounded-lg border border-slate-800 bg-slate-950 p-3 text-sm text-slate-200">
