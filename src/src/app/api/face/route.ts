@@ -39,7 +39,6 @@ export async function POST(request: NextRequest) {
     "occlusion",
     "blur",
     "exposure",
-    "qualityForRecognition",
   ];
 
   const params = new URLSearchParams({
