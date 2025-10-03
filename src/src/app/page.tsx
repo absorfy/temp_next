@@ -29,15 +29,10 @@ type FaceApiResponse = {
 const exampleImage =
   "https://raw.githubusercontent.com/Azure-Samples/cognitive-services-sample-data-files/master/ComputerVision/Images/faces.jpg";
 
-type UiError = {
-  message: string;
-  details?: string;
-};
-
 export default function Home() {
   const [imageUrl, setImageUrl] = useState<string>(exampleImage);
   const [faces, setFaces] = useState<FaceApiResponse>([]);
-  const [error, setError] = useState<UiError | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const hasResults = faces.length > 0;
@@ -87,7 +82,7 @@ export default function Home() {
     event.preventDefault();
 
     if (!imageUrl.trim()) {
-      setError({ message: "Please provide an image URL." });
+      setError("Please provide an image URL.");
       return;
     }
 
