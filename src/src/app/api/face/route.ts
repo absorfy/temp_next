@@ -50,18 +50,31 @@ export async function POST(request: NextRequest) {
 
     const text = await azureResponse.text();
 
+    const parsedBody = safeParseJson(text) ?? text;
+
     if (!azureResponse.ok) {
+      const isAuthError = azureResponse.status === 401 || azureResponse.status === 403;
+      const message = isAuthError
+        ? "Azure rejected the request. Double-check that your Face API resource is approved for use and that the endpoint and key belong to the same resource."
+        : "Azure Face API request failed";
+
+      console.error("Azure Face API error", {
+        status: azureResponse.status,
+        body: parsedBody,
+      });
+
       return NextResponse.json(
         {
-          error: "Azure Face API request failed",
-          details: safeParseJson(text) ?? text,
+          error: message,
+          details: parsedBody,
         },
         { status: azureResponse.status },
       );
     }
 
-    return NextResponse.json(safeParseJson(text) ?? text);
+    return NextResponse.json(parsedBody);
   } catch (error) {
+    console.error("Unexpected error calling Azure Face API", error);
     return NextResponse.json(
       {
         error: "Unexpected error calling Azure Face API",

@@ -114,12 +114,13 @@ export default function Home() {
     } catch (caughtError) {
       const message =
         caughtError instanceof Error ? caughtError.message : "Unexpected error while contacting the Face API";
-      const details =
-        caughtError instanceof Error && "cause" in caughtError && caughtError.cause
-          ? String(caughtError.cause)
-          : undefined;
+      const detailsRaw = caughtError instanceof Error && "cause" in caughtError ? caughtError.cause : undefined;
+      const formattedDetails = formatErrorDetails(detailsRaw);
 
-      setError(details ? `${message}. ${details}` : message);
+      setError({
+        message,
+        details: formattedDetails,
+      });
     } finally {
       setIsLoading(false);
     }
@@ -178,7 +179,16 @@ export default function Home() {
             <div className="flex flex-col gap-2">
               <h2 className="text-lg font-semibold text-slate-100">Detection results</h2>
               {isLoading && <p className="text-sm text-slate-400">Calling Azure Face API…</p>}
-              {error && <p className="rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm text-red-200">{error}</p>}
+              {error && (
+                <div className="rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm text-red-200">
+                  <p className="font-semibold">{error.message}</p>
+                  {error.details && (
+                    <pre className="mt-2 overflow-auto whitespace-pre-wrap rounded bg-red-500/20 p-2 text-xs text-red-100">
+                      {error.details}
+                    </pre>
+                  )}
+                </div>
+              )}
               {!isLoading && !error && !hasResults && (
                 <p className="text-sm text-slate-400">
                   Submit an image to see detected faces, bounding box coordinates, and selected attributes.
@@ -216,6 +226,22 @@ export default function Home() {
       </main>
     </div>
   );
+}
+
+function formatErrorDetails(details: unknown) {
+  if (details === undefined || details === null) {
+    return undefined;
+  }
+
+  if (typeof details === "string") {
+    return details;
+  }
+
+  try {
+    return JSON.stringify(details, null, 2);
+  } catch {
+    return String(details);
+  }
 }
 
 function safeParseJson(payload: string) {
